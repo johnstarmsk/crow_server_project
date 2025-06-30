@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Медиа-портал</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --accent: #4285f4;
+            --text: #e0e0e0;
+            --border: #333;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            margin: 0;
+            padding: 40px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logout {
+            color: var(--accent);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .card {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 30px;
+            transition: transform 0.3s;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+        .card-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        a.card {
+            color: var(--text); /* Наследует цвет текста */
+            text-decoration: none; /* Убирает подчёркивание */
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Главная</div>
+        <div class="user-info">
+            <span>{{auth_user}}</span>
+            <div class="logout" onclick="location.href='/exit'">
+                <i class="material-icons">exit_to_app</i>
+                Выход
+            </div>
+        </div>
+    </header>
+
+    <div id="time_update" style="background: grey; border-radius: 5px; width: 170px; padding: 10px">
+        Time
+    </div>
+
+    <br>
+    
+    <div class="cards">
+        <a href="/audio" class="card">
+            <div class="card-icon">
+                <i class="material-icons">library_music</i>
+            </div>
+            <div class="card-title">Аудио-треки</div>
+        </a>
+        
+        <a href="/video" class="card">
+            <div class="card-icon">
+                <i class="material-icons">video_library</i>
+            </div>
+            <div class="card-title">Видео-клипы</div>
+        </a>
+        
+        <a href="/users" class="card">
+            <div class="card-icon">
+                <i class="material-icons">person_library</i>
+            </div>
+            <div class="card-title">Пользователи</div>
+            <p>Управление пользователями системы</p>
+        </a>
+
+        <a href="/gallery" class="card">
+            <div class="card-icon">
+                <i class="material-icons">image_library</i>
+            </div>
+            <div class="card-title">Галерея</div>
+        </a>
+    </div>
+</body>
+<script>
+    function logout() {
+        window.location = '/exit';
+    }
+
+    const ws = new WebSocket("wss://" + location.host + "/time_ws");
+    ws.onmessage = (event) => {
+        const string = event.data;
+        document.getElementById("time_update").textContent = string;
+    };
+</script>
+</html>

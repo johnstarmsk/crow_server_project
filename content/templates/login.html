@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #e0e0e0;
+        }
+        .login-box {
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 320px;
+        }
+        .login-box h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            color: #fff;
+            background: #2d2d2d;
+            transition: border 0.3s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+    </style>
+
+  </head>
+  <body>
+    <form method="POST" action="/auth">
+        <div class="login-box">
+            <h2>Вход в систему</h2>
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Логин" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Пароль" required>
+            </div>
+            <button type="submit">Войти</button>
+        </div>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка файлов</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --accent: #4285f4;
+            --text: #e0e0e0;
+            --text-secondary: #aaa;
+            --border: #333;
+            --success: #4CAF50;
+            --error: #f44336;
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            background: var(--bg-panel);
+            padding: 15px 40px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        main {
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            margin-top: 0;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .upload-form {
+            border: 2px dashed var(--border);
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+            background: var(--bg-panel);
+            transition: border-color 0.3s;
+        }
+        
+        .upload-form:hover {
+            border-color: var(--accent);
+        }
+        
+        .file-input-container {
+            margin-bottom: 20px;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 15px;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .file-input-label:hover {
+            background: #2a2a2a;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .submit-btn {
+            padding: 12px 24px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            background: #3367d6;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        
+        .back-btn:hover {
+            background: #2a2a2a;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .success {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--text);
+            border: 1px solid var(--success);
+        }
+        
+        .error {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--text);
+            border: 1px solid var(--error);
+        }
+        
+        .file-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            background: var(--bg-panel);
+        }
+        
+        .file-item {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80%;
+        }
+        
+        .file-size {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <main>
+        <h1>Загрузка изображений</h1>
+        
+        <form class="upload-form" id="uploadForm">
+            <div class="file-input-container">
+                <label class="file-input-label">
+                    <i class="material-icons">cloud_upload</i>
+                    <span>Выберите файлы или перетащите их сюда</span>
+                    <input type="file" class="file-input" id="fileInput" name="files" multiple accept="image/*" required>
+                </label>
+            </div>
+            
+            <div class="file-list" id="fileList"></div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="material-icons">file_upload</i>
+                Загрузить файлы
+            </button>
+        </form>
+        
+        <a href="/gallery" class="back-btn">
+            <i class="material-icons">arrow_back</i>
+            Назад в галерею
+        </a>
+        
+        <div id="statusMessage" class="status"></div>
+    </main>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadForm = document.getElementById('uploadForm');
+        const statusElement = document.getElementById('statusMessage');
+        
+        // Обработчик выбора файлов
+        fileInput.addEventListener('change', function() {
+            updateFileList();
+        });
+        
+        // Обработчик drag and drop
+        uploadForm.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        
+        uploadForm.addEventListener('dragleave', function() {
+            this.classList.remove('dragover');
+        });
+        
+        uploadForm.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                updateFileList();
+            }
+        });
+        
+        // Обновление списка файлов
+        function updateFileList() {
+            fileList.innerHTML = '';
+            
+            if (fileInput.files.length === 0) {
+                fileList.style.display = 'none';
+                return;
+            }
+            
+            fileList.style.display = 'block';
+            
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const file = fileInput.files[i];
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileName = document.createElement('span');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                const fileSize = document.createElement('span');
+                fileSize.className = 'file-size';
+                fileSize.textContent = formatFileSize(file.size);
+                
+                fileItem.appendChild(fileName);
+                fileItem.appendChild(fileSize);
+                fileList.appendChild(fileItem);
+            }
+        }
+        
+        // Форматирование размера файла
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Обработчик отправки формы
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (fileInput.files.length === 0) {
+                showStatus('Пожалуйста, выберите файлы', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            
+            // Добавляем все файлы
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('files', fileInput.files[i]);
+            }
+            
+            showStatus('Загрузка файлов...', '');
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text || 'Ошибка при загрузке файлов');
+                    });
+                }
+            })
+            .then(data => {
+                showStatus(`Успешно загружено ${data.uploaded_count || fileInput.files.length} файлов`, 'success');
+                uploadForm.reset();
+                fileList.style.display = 'none';
+            })
+            .catch(error => {
+                showStatus(error.message, 'error');
+            });
+        });
+        
+        // Показать статус
+        function showStatus(message, type) {
+            statusElement.textContent = message;
+            statusElement.className = 'status ' + type;
+            statusElement.style.display = 'block';
+            
+            // Скрыть сообщение через 5 секунд
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    statusElement.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

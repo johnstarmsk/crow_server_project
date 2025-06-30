@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аудиоплеер</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --accent: #4285f4;
+            --text: #e0e0e0;
+            --text-secondary: #aaa;
+            --border: #333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        header {
+            background: var(--bg-panel);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logout {
+            color: var(--accent);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s;
+        }
+        
+        .logout:hover {
+            opacity: 0.8;
+        }
+        
+        main {
+            padding: 30px 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            margin-top: 0;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .track {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            transition: transform 0.3s;
+        }
+        
+        .track:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .track h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+        
+        audio {
+            width: 100%;
+            outline: none;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            background: #2a2a2a;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">Аудио</div>
+        <div class="user-info">
+            <span>{{auth_user}}</span>
+            <div class="logout" onclick="location.href='/exit'">
+                <i class="material-icons">exit_to_app</i>
+                Выход
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        {{#tracks}}
+        <div class="track">
+            <h3>{{title}}</h3>
+            <audio controls>
+                <source src="/audio/{{index}}" type="audio/mpeg">
+                Ваш браузер не поддерживает аудио элемент.
+            </audio>
+        </div>
+        {{/tracks}}
+
+        <a href="/home" class="back-btn">
+            <i class="material-icons">arrow_back</i>
+            Назад
+        </a>
+        
+    </main>
+
+    <script>
+        // Дополнительные скрипты для улучшения функционала
+        document.querySelectorAll('audio').forEach(audio => {
+            // Приостанавливаем другие треки при воспроизведении нового
+            audio.addEventListener('play', () => {
+                document.querySelectorAll('audio').forEach(otherAudio => {
+                    if (otherAudio !== audio && !otherAudio.paused) {
+                        otherAudio.pause();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

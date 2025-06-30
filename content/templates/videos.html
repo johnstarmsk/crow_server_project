@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Video</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --accent: #4285f4;
+            --text: #e0e0e0;
+            --text-secondary: #aaa;
+            --border: #333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        header {
+            background: var(--bg-panel);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logout {
+            color: var(--accent);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s;
+        }
+        
+        .logout:hover {
+            opacity: 0.8;
+        }
+        
+        main {
+            padding: 30px 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .video-container {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        video {
+            width: 100%;
+            display: block;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .video-list {
+            margin-top: 20px;
+        }
+        .video-item {
+            padding: 10px;
+            background: var(--bg-panel);
+            color: var(--text);
+            margin-bottom: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .video-item:hover {
+            background: #2a2a2a;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            background: #2a2a2a;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">Видео</div>
+        <div class="user-info">
+            <span>{{auth_user}}</span>
+            <div class="logout" onclick="location.href='/exit'">
+                <i class="material-icons">exit_to_app</i>
+                Выход
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+    <h1>Video_1</h1>
+    
+    <div class="video-container">
+        <video id="main-video" controls>
+            <source src="{{video_source}}" type="video/mp4">
+            Your browser does not support HTML5 video.
+        </video>
+    </div>
+
+    <div class="video-list">
+        <h3>Videos:</h3>
+        {{#videos}}
+        <div class="video-item" onclick="changeVideo('{{path}}', '{{title}}')">
+            {{title}} ({{duration}})
+        </div>
+        {{/videos}}
+    </div>
+
+    <a href="/home" class="back-btn">
+        <i class="material-icons">arrow_back</i>
+        Назад
+    </a>
+
+    <script>
+        // Update time display
+        const video = document.getElementById('main-video');
+        const timeDisplay = document.getElementById('time-display');
+        
+        video.addEventListener('timeupdate', () => {
+            timeDisplay.textContent = 
+                formatTime(video.currentTime) + " / " + formatTime(video.duration);
+        });
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function changeVideo(path, title) {
+            video.src = path;
+            document.querySelector('h1').textContent = title;
+            video.load();
+        }
+
+        function toggleFullscreen() {
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            }
+        }
+    </script>
+    </main>
+</body>
+</html>

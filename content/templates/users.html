@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление пользователями</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --accent: #4285f4;
+            --text: #e0e0e0;
+            --text-secondary: #aaa;
+            --border: #333;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --warning: #ff9800;
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        header {
+            background: var(--bg-panel);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logout {
+            color: var(--accent);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s;
+        }
+        
+        .logout:hover {
+            opacity: 0.8;
+        }
+        
+        main {
+            padding: 30px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            margin-top: 0;
+            font-weight: 500;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: #2a2a2a;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background: #2a2a2a;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            border: none;
+            margin-right: 8px;
+        }
+        
+        .edit-btn {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .edit-btn:hover {
+            background: #e68a00;
+        }
+        
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: var(--bg-panel);
+            margin: 10% auto;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .close {
+            color: var(--text-secondary);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover {
+            color: var(--text);
+        }
+        
+        .modal h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .password-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: #2a2a2a;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 15px;
+            transition: border 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 15px;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 5px;
+        }
+        
+        .toggle-password:hover {
+            color: var(--text);
+        }
+        
+        .icon {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
+        
+        .eye-slash-icon {
+            display: none;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            background: #3367d6;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">Пользователи</div>
+        <div class="user-info">
+            <span>{{auth_user}}</span>
+            <div class="logout" onclick="location.href='/exit'">
+                <i class="material-icons">exit_to_app</i>
+                Выход
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="controls">
+            <h1>Управление пользователями</h1>
+            <button id="addUserBtn" class="btn btn-primary">
+                <i class="material-icons">person_add</i>
+                Добавить пользователя
+            </button>
+        </div>
+
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Роль</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#users}}
+                <tr>
+                    <td>{{username}}</td>
+                    <td>{{role}}</td>
+                    <td>
+                        <button class="action-btn edit-btn">
+                            <i class="material-icons" style="font-size: 18px; vertical-align: middle;">edit</i>
+                            Редактировать
+                        </button>
+                        <button class="action-btn delete-btn">
+                            <i class="material-icons" style="font-size: 18px; vertical-align: middle;">delete</i>
+                            Удалить
+                        </button>
+                    </td>
+                </tr>
+                {{/users}}
+            </tbody>
+        </table>
+
+        <a href="/home" class="btn btn-secondary" style="margin-top: 25px; text-decoration: none;">
+            <i class="material-icons">arrow_back</i>
+            Назад
+        </a>
+
+        <!-- Модальное окно добавления пользователя -->
+        <div id="userModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Новый пользователь</h2>
+                <form id="userForm">
+                    <div class="form-group">
+                        <label>Имя пользователя</label>
+                        <input type="text" class="form-control" name="username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <div class="password-container">
+                            <input type="password" class="form-control" name="password" required>
+                            <button type="button" class="toggle-password" aria-label="Показать пароль">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path class="eye-icon" d="M12 4C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                    <path class="eye-slash-icon" d="M12 6.5c3.79 0 7.17 2.13 8.82 5.5-1.65 3.37-5.02 5.5-8.82 5.5-3.79 0-7.17-2.13-8.82-5.5C4.83 8.63 8.21 6.5 12 6.5zm0 2.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm-9.78.22L3.5 4.5l18 18 1.28-1.28-4.5-4.5C16.26 17.48 14.37 18 12 18c-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.5L2.22 9.72z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Подтверждение пароля</label>
+                        <div class="password-container">
+                            <input type="password" class="form-control" name="password_again" required>
+                            <button type="button" class="toggle-password" aria-label="Показать пароль">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path class="eye-icon" d="M12 4C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                    <path class="eye-slash-icon" d="M12 6.5c3.79 0 7.17 2.13 8.82 5.5-1.65 3.37-5.02 5.5-8.82 5.5-3.79 0-7.17-2.13-8.82-5.5C4.83 8.63 8.21 6.5 12 6.5zm0 2.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm-9.78.22L3.5 4.5l18 18 1.28-1.28-4.5-4.5C16.26 17.48 14.37 18 12 18c-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.5L2.22 9.72z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Роль</label>
+                        <select class="form-control" name="role" required>
+                            <option value="guest">Гость</option>
+                            <option value="administrator">Администратор</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Добавить</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Модальное окно редактирования пользователя -->
+        <div id="userEditModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Редактирование пользователя</h2>
+                <form id="userEditForm">
+                    <div class="form-group">
+                        <label>Имя пользователя</label>
+                        <input type="text" class="form-control" name="username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Новый пароль (оставьте пустым, чтобы не менять)</label>
+                        <div class="password-container">
+                            <input type="password" class="form-control" name="password">
+                            <button type="button" class="toggle-password" aria-label="Показать пароль">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path class="eye-icon" d="M12 4C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                    <path class="eye-slash-icon" d="M12 6.5c3.79 0 7.17 2.13 8.82 5.5-1.65 3.37-5.02 5.5-8.82 5.5-3.79 0-7.17-2.13-8.82-5.5C4.83 8.63 8.21 6.5 12 6.5zm0 2.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm-9.78.22L3.5 4.5l18 18 1.28-1.28-4.5-4.5C16.26 17.48 14.37 18 12 18c-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.5L2.22 9.72z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Подтверждение пароля</label>
+                        <div class="password-container">
+                            <input type="password" class="form-control" name="password_again">
+                            <button type="button" class="toggle-password" aria-label="Показать пароль">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path class="eye-icon" d="M12 4C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                    <path class="eye-slash-icon" d="M12 6.5c3.79 0 7.17 2.13 8.82 5.5-1.65 3.37-5.02 5.5-8.82 5.5-3.79 0-7.17-2.13-8.82-5.5C4.83 8.63 8.21 6.5 12 6.5zm0 2.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm-9.78.22L3.5 4.5l18 18 1.28-1.28-4.5-4.5C16.26 17.48 14.37 18 12 18c-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.5L2.22 9.72z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Роль</label>
+                        <select class="form-control" name="role" required>
+                            <option value="guest">Гость</option>
+                            <option value="administrator">Администратор</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Функция переключения видимости пароля
+        function setupPasswordToggle() {
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const container = this.closest('.password-container');
+                    const input = container.querySelector('input');
+                    const icon = container.querySelector('.eye-icon');
+                    const slashIcon = container.querySelector('.eye-slash-icon');
+                    
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    
+                    if (type === 'password') {
+                        icon.style.display = 'block';
+                        slashIcon.style.display = 'none';
+                    } else {
+                        icon.style.display = 'none';
+                        slashIcon.style.display = 'block';
+                    }
+                });
+            });
+        }
+
+        // Модальное окно добавления пользователя
+        const modal = document.getElementById("userModal");
+        const addBtn = document.getElementById("addUserBtn");
+        const closeBtns = document.querySelectorAll(".close");
+
+        addBtn.onclick = () => {
+            document.getElementById("userForm").reset();
+            modal.style.display = "block";
+        };
+
+        closeBtns.forEach(btn => {
+            btn.onclick = () => {
+                modal.style.display = "none";
+                document.getElementById("userEditModal").style.display = "none";
+            };
+        });
+
+        window.addEventListener('mousedown', (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+            if (event.target === document.getElementById("userEditModal")) {
+                document.getElementById("userEditModal").style.display = "none";
+            }
+        });
+
+        // Обработка формы добавления пользователя
+        document.getElementById("userForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            if (this.password.value !== this.password_again.value) {
+                alert("Пароли не совпадают");
+                return;
+            }
+
+            const formData = {
+                username: this.username.value,
+                password: this.password.value,
+                role: this.role.value
+            };
+
+            fetch('/user/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Пользователь добавлен');
+                    modal.style.display = "none";
+                    location.reload();
+                } else {
+                    throw new Error(data.message || 'Ошибка');
+                }
+            })
+            .catch(error => {
+                alert(error.message);
+                modal.style.display = "none";
+            });
+        });
+
+        // Обработка кнопок редактирования
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const editModal = document.getElementById("userEditModal");
+                const row = this.closest('tr');
+                const username = row.cells[0].textContent;
+                const role = row.cells[1].textContent;
+                
+                const form = document.getElementById("userEditForm");
+                form.username.value = username;
+                form.role.value = role.toLowerCase();
+                form.password.value = '';
+                form.password_again.value = '';
+                
+                editModal.style.display = "block";
+                
+                // Сохраняем исходные данные для идентификации пользователя
+                form.dataset.originalUsername = username;
+                form.dataset.originalRole = role;
+            });
+        });
+
+        // Обработка формы редактирования пользователя
+        document.getElementById("userEditForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const password = this.password.value;
+            const passwordAgain = this.password_again.value;
+            
+            if (password && password !== passwordAgain) {
+                alert("Пароли не совпадают");
+                return;
+            }
+
+            const formData = {
+                old_username: this.dataset.originalUsername,
+                old_role: this.dataset.originalRole,
+                username: this.username.value,
+                password: password,
+                role: this.role.value
+            };
+
+            fetch('/user/edit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Данные пользователя изменены');
+                    document.getElementById("userEditModal").style.display = "none";
+                    location.reload();
+                } else {
+                    throw new Error(data.message || 'Ошибка');
+                }
+            })
+            .catch(error => {
+                alert(error.message);
+                document.getElementById("userEditModal").style.display = "none";
+            });
+        });
+
+        // Обработка кнопок удаления
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const username = row.cells[0].textContent;
+                const role = row.cells[1].textContent;
+                
+                if (confirm(`Вы уверены, что хотите удалить пользователя ${username}?`)) {
+                    fetch('/user/delete', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            username: username,
+                            role: role
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message || 'Пользователь удален');
+                            location.reload();
+                        } else {
+                            throw new Error(data.message || 'Ошибка');
+                        }
+                    })
+                    .catch(error => {
+                        alert(error.message);
+                        location.reload();
+                    });
+                }
+            });
+        });
+
+        // Инициализация переключателей пароля
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPasswordToggle();
+        });
+    </script>
+</body>
+</html>
